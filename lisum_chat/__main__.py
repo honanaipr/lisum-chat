@@ -1,5 +1,7 @@
-from .app import bot, dp, redmine
-import asyncio, logging, sys
+from .app import bot, dp
+import asyncio
+import logging
+import sys
 
 
 async def main() -> None:
