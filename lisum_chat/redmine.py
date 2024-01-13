@@ -1,6 +1,5 @@
 from .config import config
 import httpx
-import json
 import enum
 from .schemas.redmine_schemas import SearchResponse
 
@@ -21,6 +20,3 @@ async def request_json(function: FunctionType, query: str):
 async def search(query: str) -> SearchResponse:
     result = await request_json(FunctionType.search, query=query)
     return SearchResponse.model_validate(result)
-
-
-json.load
