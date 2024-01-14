@@ -1,5 +1,6 @@
 from aiogram import Router, types, F
 from .. import redmine
+from ..markups.main_markup import estimates_markup
 
 main_router = Router()
 
@@ -17,4 +18,17 @@ async def message_handler(message: types.Message, message_text: str) -> None:
         await result_message.edit_text(f"❗️ Ошибка\n{e}", parse_mode=None)
         print(e)
     else:
-        await result_message.edit_text(search_result, parse_mode=None)
+        await result_message.edit_text(
+            search_result, parse_mode=None, reply_markup=estimates_markup
+        )
+
+
+@main_router.callback_query()
+async def my_callback_foo(query: types.CallbackQuery):
+    print(query.data)
+    if isinstance(query.message, types.Message):
+        await query.message.edit_reply_markup(reply_markup=None)
+    if query.data == "+":
+        await query.answer(text="👍", show_alert=False)
+    if query.data == "-":
+        await query.answer(text="👎", show_alert=False)
