@@ -39,29 +39,34 @@ async def message_handler(message: types.Message, message_text: str) -> None:
             )
 
 
-@main_router.callback_query()
-async def my_callback_foo(query: types.CallbackQuery):
+@main_router.callback_query(
+    F.message.chat.id.as_("chat_id"),
+    F.message.as_("original_message_id"),
+    F.data.as_("query_data"),
+)
+async def my_callback_foo(
+    query: types.CallbackQuery, chat_id: int, original_message_id: int, query_data: str
+):
     if isinstance(query.message, types.Message):
         await query.message.edit_reply_markup(reply_markup=None)
     else:
         return
-    assert query.message.text
-    if query.data == "+":
+    if query_data == "+":
         with SessionLocal() as session:
             add_estimate(
                 session=session,
-                chat_id=query.message.chat.id,
-                message_id=query.message.reply_to_message.message_id,
+                chat_id=chat_id,
+                message_id=original_message_id,
                 estimate="good",
             )
             session.commit()
         await query.answer(text="👍", show_alert=False)
-    if query.data == "-":
+    if query_data == "-":
         with SessionLocal() as session:
             add_estimate(
                 session=session,
-                chat_id=query.message.chat.id,
-                message_id=query.message.message_id,
+                chat_id=chat_id,
+                message_id=original_message_id,
                 estimate="bad",
             )
             session.commit()
