@@ -1,6 +1,8 @@
 from aiogram import Router, types, F
 from .. import redmine
 from ..markups.main_markup import estimates_markup
+from ..database import SessionLocal
+from ..crud.estimate_crud import add_estimate
 
 main_router = Router()
 
@@ -25,10 +27,18 @@ async def message_handler(message: types.Message, message_text: str) -> None:
 
 @main_router.callback_query()
 async def my_callback_foo(query: types.CallbackQuery):
-    print(query.data)
     if isinstance(query.message, types.Message):
         await query.message.edit_reply_markup(reply_markup=None)
+    else:
+        return
+    assert query.message.text
     if query.data == "+":
+        with SessionLocal() as session:
+            add_estimate(session=session, reply=query.message.text, estimate=True)
+            session.commit()
         await query.answer(text="👍", show_alert=False)
     if query.data == "-":
+        with SessionLocal() as session:
+            add_estimate(session=session, reply=query.message.text, estimate=True)
+            session.commit()
         await query.answer(text="👎", show_alert=False)
