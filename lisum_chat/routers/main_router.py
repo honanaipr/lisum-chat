@@ -39,6 +39,6 @@ async def my_callback_foo(query: types.CallbackQuery):
         await query.answer(text="👍", show_alert=False)
     if query.data == "-":
         with SessionLocal() as session:
-            add_estimate(session=session, reply=query.message.text, estimate=True)
+            add_estimate(session=session, reply=query.message.text, estimate=False)
             session.commit()
         await query.answer(text="👎", show_alert=False)
