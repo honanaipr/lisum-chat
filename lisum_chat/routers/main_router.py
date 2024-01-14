@@ -51,7 +51,7 @@ async def my_callback_foo(
         await query.message.edit_reply_markup(reply_markup=None)
     else:
         return
-    if query_data == "+":
+    if query_data == "good":
         with SessionLocal() as session:
             add_estimate(
                 session=session,
@@ -61,7 +61,7 @@ async def my_callback_foo(
             )
             session.commit()
         await query.answer(text="👍", show_alert=False)
-    if query_data == "-":
+    if query_data == "bad":
         with SessionLocal() as session:
             add_estimate(
                 session=session,
