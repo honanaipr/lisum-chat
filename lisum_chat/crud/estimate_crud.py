@@ -1,6 +1,7 @@
 from ..models.response_model import Response
 from ..models.query_model import Query
 from ..models.estimate_model import Estimate
+from ..models.enhancement_model import Enhancement
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from typing import Literal
@@ -64,3 +65,27 @@ def add_estimate(
         chat_id=chat_id,
     )
     session.add(db_estimate)
+
+
+def add_enhancement(
+    session: Session,
+    chat_id: int,
+    message_id: int,
+    enhancement_text: str,
+    response_message_id: int,
+):
+    stmt = (
+        select(Response)
+        .where(Response.chat_id == chat_id)
+        .where(Response.message_id == response_message_id)
+    )
+    db_response = session.scalars(stmt).first()
+    if db_response is None:
+        raise Exception("Response not found!")
+    db_enhancement = Enhancement(
+        response_id=db_response.id,
+        enhancement_text=enhancement_text,
+        message_id=message_id,
+        chat_id=chat_id,
+    )
+    session.add(db_enhancement)

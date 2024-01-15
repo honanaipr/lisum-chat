@@ -2,7 +2,7 @@ from aiogram import Router, types, F
 from .. import redmine
 from ..markups.main_markup import estimates_markup
 from ..database import SessionLocal
-from ..crud.estimate_crud import add_estimate, add_response, add_query
+from ..crud.estimate_crud import add_estimate, add_response, add_query, add_enhancement
 from typing import Literal
 from aiogram.filters import Filter
 from ..bot import bot
@@ -13,19 +13,25 @@ main_router = Router()
 class ReplyToMeFilter(Filter):
     async def __call__(self, message: types.Message) -> bool | dict[str, int]:
         reply_to_user_id = F.reply_to_message.from_user.id.resolve(message)
-        original_message_id = F.reply_to_message.reply_to_message.message_id.resolve(
-            message
-        )
+        origin_message_id = F.reply_to_message.message_id.resolve(message)
         if reply_to_user_id and reply_to_user_id == (await bot.me()).id:
-            return {"original_message_id": original_message_id}
+            return {"origin_message_id": origin_message_id}
         return False
 
 
-@main_router.message(ReplyToMeFilter())
+@main_router.message(ReplyToMeFilter(), F.text.as_("message_text"))
 async def reply_message_handler(
-    message: types.Message, original_message_id: int
+    message: types.Message, origin_message_id: int, message_text: str
 ) -> None:
-    print(original_message_id)
+    with SessionLocal() as session:
+        add_enhancement(
+            session=session,
+            message_id=message.message_id,
+            chat_id=message.chat.id,
+            enhancement_text=message_text,
+            response_message_id=origin_message_id,
+        )
+        session.commit()
 
 
 @main_router.message(F.text.as_("message_text"))
