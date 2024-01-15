@@ -1,5 +1,5 @@
-from .bot import bot
-from .dispatcher import dp
+from lisum_chat.bot import bot
+from lisum_chat.dispatcher import dp
 import asyncio
 import logging
 import sys
