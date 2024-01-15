@@ -1,4 +1,5 @@
-from .app import bot, dp
+from .bot import bot
+from .dispatcher import dp
 import asyncio
 import logging
 import sys
