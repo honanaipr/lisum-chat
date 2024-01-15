@@ -15,7 +15,9 @@ class Settings(BaseSettings):
     redmine: RedmineSettings
     bot: BotSettings
 
-    model_config = SettingsConfigDict(env_nested_delimiter="_")
+    model_config = SettingsConfigDict(
+        env_nested_delimiter="_", env_file=".env", env_file_encoding="utf-8"
+    )
 
 
 config = Settings()
