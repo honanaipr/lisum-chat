@@ -3,6 +3,7 @@ from .. import redmine
 from ..markups.main_markup import estimates_markup
 from ..database import SessionLocal
 from ..crud.estimate_crud import add_estimate, add_response
+from typing import Literal
 
 main_router = Router()
 
@@ -41,11 +42,15 @@ async def message_handler(message: types.Message, message_text: str) -> None:
 
 @main_router.callback_query(
     F.message.chat.id.as_("chat_id"),
-    F.message.as_("original_message_id"),
+    F.message.reply_to_message.message_id.as_("original_message_id"),
+    F.data.in_(["good", "bad"]),
     F.data.as_("query_data"),
 )
 async def my_callback_foo(
-    query: types.CallbackQuery, chat_id: int, original_message_id: int, query_data: str
+    query: types.CallbackQuery,
+    chat_id: int,
+    original_message_id: int,
+    query_data: Literal["good", "bad"],
 ):
     if isinstance(query.message, types.Message):
         await query.message.edit_reply_markup(reply_markup=None)
