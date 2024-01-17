@@ -4,7 +4,6 @@ from ..models.estimate_model import Estimate
 from ..models.enhancement_model import Enhancement
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-from typing import Literal
 
 
 def add_query(
@@ -19,6 +18,8 @@ def add_query(
         chat_id=chat_id,
     )
     session.add(db_estimate)
+    session.flush()
+    return db_estimate.id
 
 
 def add_response(
@@ -41,23 +42,19 @@ def add_response(
         chat_id=chat_id,
     )
     session.add(db_estimate)
+    session.flush()
+    return db_estimate.id
 
 
 def add_estimate(
     session: Session,
     chat_id: int,
     query_id: str,
-    estimate: Literal["good", "bad"],
-    response_message_id: int,
+    estimate: str,
+    response_id: int,
 ):
-    stmt = (
-        select(Response)
-        .where(Response.chat_id == chat_id)
-        .where(Response.message_id == response_message_id)
-    )
-    db_response = session.scalars(stmt).first()
-    if db_response is None:
-        raise Exception("Response not found!")
+    stmt = select(Response).where(Response.id == response_id)
+    db_response = session.scalars(stmt).one()
     db_estimate = Estimate(
         response_id=db_response.id,
         estimate=estimate,
@@ -65,6 +62,8 @@ def add_estimate(
         chat_id=chat_id,
     )
     session.add(db_estimate)
+    session.flush()
+    return db_estimate.id
 
 
 def add_enhancement(
@@ -89,3 +88,17 @@ def add_enhancement(
         chat_id=chat_id,
     )
     session.add(db_enhancement)
+    session.flush()
+    return db_enhancement.id
+
+
+def get_responses_by_message_id(
+    session: Session, chat_id: int, message_id
+) -> list[int]:
+    stmt = (
+        select(Response)
+        .where(Response.chat_id == chat_id)
+        .where(Response.message_id == message_id)
+    )
+    db_responses = session.scalars(stmt)
+    return [db_response.id for db_response in db_responses]

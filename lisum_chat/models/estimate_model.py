@@ -1,7 +1,6 @@
 from ..database import Base
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey
-from typing import Literal
 
 
 class Estimate(Base):
@@ -10,4 +9,4 @@ class Estimate(Base):
     response_id: Mapped[int] = mapped_column(ForeignKey("response.id"))
     query_id: Mapped[str]
     chat_id: Mapped[int]
-    estimate: Mapped[Literal["good", "bad"]]
+    estimate: Mapped[str]

@@ -1,9 +1,14 @@
 from aiogram import Router, types, F
 from .. import redmine
-from ..markups.main_markup import estimates_markup
+from ..markups.main_markup import gen_markup, parce_callback_data, patch_markup
 from ..database import SessionLocal
-from ..crud.estimate_crud import add_estimate, add_response, add_query, add_enhancement
-from typing import Literal
+from ..crud.estimate_crud import (
+    add_estimate,
+    add_response,
+    add_query,
+    add_enhancement,
+    get_responses_by_message_id,
+)
 from aiogram.filters import Filter
 from ..bot import bot
 
@@ -56,49 +61,67 @@ async def query_handler(message: types.Message, message_text: str) -> None:
                     query_text=message_text,
                 )
                 session.commit()
+                response_ids = []
                 for result in results_list:
-                    add_response(
+                    response_id = add_response(
                         session=session,
                         query_message_id=message.message_id,
                         response_text=result,
                         message_id=result_message.message_id,
                         chat_id=message.chat.id,
                     )
+                    response_ids.append(response_id)
                 session.commit()
         except Exception as e:
             await result_message.edit_text(f"❗️ Ошибка\n{e}", parse_mode=None)
             print(e)
         else:
             await result_message.edit_text(
-                search_result, parse_mode=None, reply_markup=estimates_markup
+                search_result, parse_mode=None, reply_markup=gen_markup(response_ids)
             )
 
 
 @main_router.callback_query(
     F.message.chat.id.as_("chat_id"),
     F.message.message_id.as_("response_message_id"),
-    F.data.in_(["good", "bad"]),
+    # F.data.in_(["good", "bad"]),
     F.data.as_("query_data"),
 )
 async def my_callback_foo(
     query: types.CallbackQuery,
     chat_id: int,
     response_message_id: int,
-    query_data: Literal["good", "bad"],
+    query_data: str,
 ):
-    if isinstance(query.message, types.Message):
-        await query.message.edit_reply_markup(reply_markup=None)
+    if query_data == "bad":
+        if isinstance(query.message, types.Message):
+            await query.message.edit_reply_markup(reply_markup=None)
+        with SessionLocal() as session:
+            for responce_id in get_responses_by_message_id(
+                message_id=response_message_id, chat_id=chat_id, session=session
+            ):
+                add_estimate(
+                    session=session,
+                    chat_id=chat_id,
+                    query_id=query.id,
+                    estimate=query_data,
+                    response_id=responce_id,
+                )
+            session.commit()
     else:
-        return
-    with SessionLocal() as session:
-        add_estimate(
-            session=session,
-            chat_id=chat_id,
-            query_id=query.id,
-            estimate=query_data,
-            response_message_id=response_message_id,
-        )
-        session.commit()
+        responce_id, estimate = parce_callback_data(query_data)
+        if isinstance(query.message, types.Message) and query.message.reply_markup:
+            patched_markup = patch_markup(query.message.reply_markup, responce_id)
+            await query.message.edit_reply_markup(reply_markup=patched_markup)
+        with SessionLocal() as session:
+            add_estimate(
+                session=session,
+                chat_id=chat_id,
+                query_id=query.id,
+                estimate=estimate,
+                response_id=responce_id,
+            )
+            session.commit()
     if query_data == "good":
         await query.answer(text="👍", show_alert=False)
     else:
