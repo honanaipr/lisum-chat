@@ -82,7 +82,7 @@ def add_enhancement(
     if db_response is None:
         raise Exception("Response not found!")
     db_enhancement = Enhancement(
-        response_id=db_response.id,
+        query_id=db_response.query.id,
         enhancement_text=enhancement_text,
         message_id=message_id,
         chat_id=chat_id,
