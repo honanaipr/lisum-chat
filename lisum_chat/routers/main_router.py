@@ -46,8 +46,8 @@ async def query_handler(message: types.Message, message_text: str) -> None:
         results_list = [
             result.url for result in (await redmine.search(message_text)).results[:3]
         ]
+
         search_result = "\n".join(results_list)
-        assert search_result
     except Exception as e:
         await result_message.edit_text(f"❗️ Ошибка\n{e}", parse_mode=None)
         print(e)
@@ -61,6 +61,11 @@ async def query_handler(message: types.Message, message_text: str) -> None:
                     query_text=message_text,
                 )
                 session.commit()
+                if not results_list:
+                    await result_message.edit_text(
+                        "❗️ Ничего не найдено :(", parse_mode=None
+                    )
+                    return
                 response_ids = []
                 for result in results_list:
                     response_id = add_response(
