@@ -1,0 +1,6 @@
+./*
+!./.env
+!./pyproject.toml
+!./README.md
+!./lisum_chat
+!./data

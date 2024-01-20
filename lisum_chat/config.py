@@ -11,9 +11,14 @@ class BotSettings(BaseModel):
     token: str
 
 
+class Database(BaseModel):
+    path: str
+
+
 class Settings(BaseSettings):
     redmine: RedmineSettings
     bot: BotSettings
+    database: Database
 
     model_config = SettingsConfigDict(
         env_nested_delimiter="_", env_file=".env", env_file_encoding="utf-8"

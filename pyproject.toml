@@ -8,16 +8,15 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 aiogram = "^3.3.0"
-python-redmine = "^2.4.0"
-python-dotenv = "^1.0.0"
-httpx = {extras = ["cli"], version = "^0.26.0"}
+httpx = "^0.26.0"
 pydantic-settings = "^2.1.0"
 pydantic = "^2.5.3"
 sqlalchemy = "^2.0.25"
-alembic = "^1.13.1"
 
 
 [tool.poetry.group.dev.dependencies]
+python-dotenv = "^1.0.0"
+alembic = "^1.13.1"
 pytest = "^7.4.4"
 black = "^23.12.1"
 pre-commit = "^3.6.0"
@@ -26,3 +25,6 @@ ruff = "^0.1.13"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+lisum_chat = 'lisum_chat.run:run'
