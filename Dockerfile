@@ -8,5 +8,5 @@ FROM python:3.10-alpine
 WORKDIR /lisum_chat
 COPY --from=build /build/dist/*.whl .
 RUN pip install *.whl
-VOLUME /data
+VOLUME /lisum_chat/data
 CMD ["lisum_chat"]
