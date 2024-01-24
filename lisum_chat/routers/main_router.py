@@ -43,11 +43,13 @@ async def reply_message_handler(
 async def query_handler(message: types.Message, message_text: str) -> None:
     result_message = await message.reply("⏳✍")
     try:
-        results_list = [
-            result.url for result in (await redmine.search(message_text)).results[:3]
-        ]
-
-        search_result = "\n".join(results_list)
+        results = (await redmine.search(message_text)).results[:3]
+        response_text = "\n\n".join(
+            [
+                f"{index}: {result.title}\n{result.url} "
+                for index, result in enumerate(results, start=1)
+            ]
+        )
     except Exception as e:
         await result_message.edit_text(f"❗️ Ошибка\n{e}", parse_mode=None)
         print(e)
@@ -61,17 +63,17 @@ async def query_handler(message: types.Message, message_text: str) -> None:
                     query_text=message_text,
                 )
                 session.commit()
-                if not results_list:
+                if not results:
                     await result_message.edit_text(
                         "❗️ Ничего не найдено :(", parse_mode=None
                     )
                     return
                 response_ids = []
-                for result in results_list:
+                for result in results:
                     response_id = add_response(
                         session=session,
                         query_message_id=message.message_id,
-                        response_text=result,
+                        response_text=result.url,
                         message_id=result_message.message_id,
                         chat_id=message.chat.id,
                     )
@@ -82,7 +84,7 @@ async def query_handler(message: types.Message, message_text: str) -> None:
             print(e)
         else:
             await result_message.edit_text(
-                search_result, parse_mode=None, reply_markup=gen_markup(response_ids)
+                response_text, parse_mode=None, reply_markup=gen_markup(response_ids)
             )
 
 
