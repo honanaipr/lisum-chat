@@ -11,6 +11,7 @@ from ..crud.estimate_crud import (
 )
 from aiogram.filters import Filter
 from ..bot import bot
+from ..config import config
 
 main_router = Router()
 
@@ -43,7 +44,7 @@ async def reply_message_handler(
 async def query_handler(message: types.Message, message_text: str) -> None:
     result_message = await message.reply("⏳✍")
     try:
-        results = (await redmine.search(message_text)).results[:3]
+        results = (await redmine.search(message_text)).results[:config.repliesnumber]
         response_text = "\n\n".join(
             [
                 f"{index}: {result.title}\n{result.url} "

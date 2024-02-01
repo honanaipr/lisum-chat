@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     redmine: RedmineSettings
     bot: BotSettings
     database: Database
+    repliesnumber: int
 
     model_config = SettingsConfigDict(
         env_nested_delimiter="_", env_file=".env", env_file_encoding="utf-8"
