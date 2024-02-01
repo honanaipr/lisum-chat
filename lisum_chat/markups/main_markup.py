@@ -11,7 +11,7 @@ def gen_markup(ids: list[int]) -> InlineKeyboardMarkup:
     for index, id in enumerate(ids, start=1):
         builder.button(text=f"{index}: 👍", callback_data=f"{id}:good")
     builder.button(text="👎", callback_data="bad")
-    builder.adjust(*[1 for _ in range(len(ids) + 1)])
+    builder.adjust(2, repeat=True)
     return builder.as_markup()
 
 
