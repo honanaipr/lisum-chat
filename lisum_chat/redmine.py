@@ -19,4 +19,6 @@ async def request_json(function: FunctionType, query: str):
 
 async def search(query: str) -> SearchResponse:
     result = await request_json(FunctionType.search, query=query)
-    return SearchResponse.model_validate(result)
+    result = SearchResponse.model_validate(result)
+    result.results = list(filter(lambda x: x.type != 'issue', result.results))
+    return result
